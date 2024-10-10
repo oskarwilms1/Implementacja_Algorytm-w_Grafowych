@@ -28,9 +28,3 @@ while iteration < len(Edges):
     iteration += 1
 for row in matrix:
     print(' '.join(row))
-
-
-
-
-
-#print(Vertices)
