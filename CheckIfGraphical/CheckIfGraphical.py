@@ -7,6 +7,7 @@ while iteration < len(user_input):
 iteration = 0
 length = len(user_input)
 while iteration < length: 
+    user_input.sort(reverse = True)
     iteration2 = 0
     temp = int(user_input[iteration2])
     user_input.pop(0)
