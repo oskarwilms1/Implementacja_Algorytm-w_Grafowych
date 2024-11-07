@@ -81,7 +81,23 @@ def IsGraphPath(vert,edg,powers):
     else:
         result = False
     return result
-        
+def IsGraphTree(vert,edg,powers):
+    result = True
+    if vert-1 == edg:
+        if '0' in powers:
+            result = False
+    else:
+        result = False
+    return result
+def IsGraphHyperCube(vert,edg,powers,matrix):
+    if (vert & (vert-1)) != 0:
+        return False
+    dimension = 1
+    temp = vert
+    while temp != 1:
+        temp /= 2
+        dimension += 1
+    iteration = 0
 
 
 adjacency_list = SetAdjList()
@@ -95,7 +111,16 @@ print("Stopnie wierzchołków: "+' '.join(ListOfPowers))
 print("Średni stopień:",AveragePower(ListOfPowers))
 if IsGraphComplete(Vertices,Edges) == True:
     print("Jest to graf pełny")
-if IsGraphCycle(Vertices,Edges,ListOfPowers)  == True:
+elif IsGraphCycle(Vertices,Edges,ListOfPowers) == True:
     print("Jest to cykl")
-if IsGraphPath(Vertices,Edges,ListOfPowers)  == True:
-    print("Jest to ścieżka")
+elif IsGraphTree(Vertices,Edges,ListOfPowers) == True:
+    if IsGraphPath(Vertices,Edges,ListOfPowers) == True:
+        print("Jest to ścieżka")
+        print("Jest to drzewo")
+    else:
+        print("Jest to drzewo")
+
+
+else:
+    print("Graf nie należy do żadnej z podstawowych klas")
+    
