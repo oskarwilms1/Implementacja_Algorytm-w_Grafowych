@@ -1,4 +1,4 @@
-def HandleUserInput():
+def SetAdjList():
     adjacency_list = {}
     while True:
         try:
@@ -31,13 +31,71 @@ def PrintMatrix(matrix : list):
 def CountVertices(matrix):
     return len(matrix)
 def CountEdges(matrix):
-    count = 0
+    Edges = 0
     for row in matrix:
         for element in row:
             if element != '0':
-                count +=1
+                Edges +=1
+    return int(Edges/2)
+def CountPowers(adj_list):
+    Powers = []
+    iteration = 1
+    while iteration <= len(adj_list):
+        Powers.append(str(len(adj_list[str(iteration)])))
+        iteration += 1
+    return Powers
+def AveragePower(Powers):
+    temp_list = [int(i) for i in Powers]
+    result = sum(temp_list)/len(temp_list)
+    result = str(format(result, '.2f'))
+    return result
+def IsGraphComplete(vert,edg):
+    if edg == vert*(vert-1)/2:
+        return True
+    else:
+        return False
+def IsGraphCycle(vert,edg,powers):
+    result = True
+    if vert == edg:
+        for element in powers:
+            if element != '2':
+                result = False
+    else:
+        result = False
+    return result
+def IsGraphPath(vert,edg,powers):
+    result = True
+    temp_list = powers
+    countOfOnes=0
+    if vert-1 == edg:
+        for element in temp_list:
+            if element == '1':
+                temp_list.remove('1')
+                countOfOnes += 1
+        if countOfOnes == 2:
+            for element in temp_list:
+                if element != '2':
+                    result = False
+        else:
+            result = False
+    else:
+        result = False
+    return result
+        
 
-adjacency_list = HandleUserInput()
+
+adjacency_list = SetAdjList()
 Matrix = ConvertToMatrix(adjacency_list)
-print("Ilość wierzchołków: ",CountVertices(Matrix))
-CountEdges(Matrix)
+ListOfPowers = CountPowers(adjacency_list)
+Edges = CountEdges(Matrix)
+Vertices = CountVertices(Matrix)
+print("Ilość wierzchołków:",Vertices)
+print("Ilość krawędzi:",Edges)
+print("Stopnie wierzchołków: "+' '.join(ListOfPowers))
+print("Średni stopień:",AveragePower(ListOfPowers))
+if IsGraphComplete(Vertices,Edges) == True:
+    print("Jest to graf pełny")
+if IsGraphCycle(Vertices,Edges,ListOfPowers)  == True:
+    print("Jest to cykl")
+if IsGraphPath(Vertices,Edges,ListOfPowers)  == True:
+    print("Jest to ścieżka")
