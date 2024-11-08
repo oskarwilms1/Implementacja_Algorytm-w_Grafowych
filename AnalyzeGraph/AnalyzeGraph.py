@@ -90,14 +90,34 @@ def IsGraphTree(vert,edg,powers):
         result = False
     return result
 def IsGraphHyperCube(vert,edg,powers,matrix):
-    if (vert & (vert-1)) != 0:
+    if vert <= 0 or (vert & (vert-1)) != 0:
         return False
-    dimension = 1
+    dimention = 0
     temp = vert
-    while temp != 1:
-        temp /= 2
-        dimension += 1
-    iteration = 0
+    while temp > 1:
+        temp //= 2
+        dimention += 1
+    if edg != dimention*(2**(dimention-1)):
+        return False
+    if powers != [str(dimention)] * vert:
+        return False
+    def is_connected(matrix):
+        #DFS
+        visited = [False] * vert
+        stack = [0]  
+        visited[0] = True
+
+        while stack:
+            vertex = stack.pop()
+            for neighbor in range(vert):
+                if matrix[vertex][neighbor] == '1' and not visited[neighbor]:
+                    visited[neighbor] = True
+                    stack.append(neighbor)
+        return all(visited)
+    if not is_connected(matrix):
+        return False
+
+    return True
 
 
 adjacency_list = SetAdjList()
@@ -111,16 +131,20 @@ print("Stopnie wierzchołków: "+' '.join(ListOfPowers))
 print("Średni stopień:",AveragePower(ListOfPowers))
 if IsGraphComplete(Vertices,Edges) == True:
     print("Jest to graf pełny")
+    if IsGraphCycle(Vertices,Edges,ListOfPowers) == True:
+        print("Jest to cykl")
 elif IsGraphCycle(Vertices,Edges,ListOfPowers) == True:
     print("Jest to cykl")
+    if IsGraphHyperCube(Vertices,Edges,ListOfPowers,Matrix) == True:
+        print("Jest to hiperkostka")
+elif IsGraphHyperCube(Vertices,Edges,ListOfPowers,Matrix) == True:
+    print("Jest to hiperkostka")
 elif IsGraphTree(Vertices,Edges,ListOfPowers) == True:
     if IsGraphPath(Vertices,Edges,ListOfPowers) == True:
         print("Jest to ścieżka")
         print("Jest to drzewo")
     else:
         print("Jest to drzewo")
-
-
 else:
     print("Graf nie należy do żadnej z podstawowych klas")
     
