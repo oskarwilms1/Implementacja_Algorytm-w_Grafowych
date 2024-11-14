@@ -61,7 +61,8 @@ def evacuation_plan(n, k, m, adjacency_matrix, exits, threats):
         full_dfs_path = []
         visited_full = [False] * n
         full_dfs(adjacency_matrix, threats[0] - 1, visited_full, full_dfs_path)
-        results.append(" ".join(map(str, full_dfs_path[:len(full_dfs_path)-1])))
+        full_dfs_path = list(dict.fromkeys(full_dfs_path))
+        results.append(" ".join(map(str, full_dfs_path)))
 
     return safe, results
 
@@ -77,9 +78,10 @@ def validate_input(n, k, m, adjacency_matrix, exits, threats):
 
     if not all(1 <= exit <= n for exit in exits) or not all(1 <= threat <= n for threat in threats):
         return False
-    for element in exits:
-        if element in threats:
-            return False
+    for row in adjacency_matrix:
+        for element in row:
+            if element not in (0, 1):  # Check for values that are not 0 or 1
+                return False
     
     return True
 
