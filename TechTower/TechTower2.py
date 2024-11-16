@@ -7,35 +7,54 @@ def quicksort(arr):
     right = [x for x in arr if x > pivot]
     return quicksort(left) + middle + quicksort(right)
 
-def dfs(graph, start, exits, visited, path):
-    visited[start] = True
-    path.append(start + 1)  # Przechowujemy jako 1-indeksowane
+def dfs(graph, start, exits):
+    stack = []
+    visited = [False] * len(graph)
+    path = []
+    
+    stack.append(start)
+    
+    while stack:
+        current = stack.pop()
+        
+        if not visited[current]:
+            visited[current] = True
+            path.append(current + 1)  
+            
+            if (current + 1) in exits: 
+                return path
 
-    if (start + 1) in exits:
-        return path  # Znaleziono wyjście, zwracamy ścieżkę
+            
+            neighbors = [i for i in range(len(graph[current])) if graph[current][i] == 1 and not visited[i]]
+            neighbors = quicksort(neighbors)  
+            
+            for neighbor in reversed(neighbors):  
+                stack.append(neighbor)
 
-    # Sprawdzanie sąsiadów
-    neighbors = [i for i in range(len(graph[start])) if graph[start][i] == 1 and not visited[i]]
-    neighbors = quicksort(neighbors)  # Sortowanie sąsiadów
+    return None  
 
-    for neighbor in neighbors:
-        result_path = dfs(graph, neighbor, exits, visited, path)
-        if result_path is not None:
-            return result_path
+def full_dfs(graph, start):
+    stack = []
+    visited = [False] * len(graph)
+    path = []
+    
+    stack.append(start)
+    
+    while stack:
+        current = stack.pop()
+        
+        if not visited[current]:
+            visited[current] = True
+            path.append(current + 1)
+            
+            
+            neighbors = [i for i in range(len(graph[current])) if graph[current][i] == 1 and not visited[i]]
+            neighbors = quicksort(neighbors)  
+            
+            for neighbor in reversed(neighbors):  
+                stack.append(neighbor)
 
-    path.pop()  # Backtrack
-    return None  # Nie znaleziono drogi
-
-def full_dfs(graph, start, visited, path):
-    visited[start] = True
-    path.append(start + 1)  # Przechowujemy jako 1-indeksowane
-
-    # Sprawdzanie sąsiadów
-    neighbors = [i for i in range(len(graph[start])) if graph[start][i] == 1 and not visited[i]]
-    neighbors = quicksort(neighbors)  # Sortowanie sąsiadów
-
-    for neighbor in neighbors:
-        full_dfs(graph, neighbor, visited, path)
+    return path  
 
 def evacuation_plan(n, k, m, adjacency_matrix, exits, threats):
     exits = quicksort(exits)
@@ -45,10 +64,8 @@ def evacuation_plan(n, k, m, adjacency_matrix, exits, threats):
     safe = True
     
     for threat in threats:
-        visited = [False] * n
-        path = []
-        start_room = threat - 1  # Zmiana na indeks 0
-        result_path = dfs(adjacency_matrix, start_room, exits, visited, path)
+        start_room = threat - 1  
+        result_path = dfs(adjacency_matrix, start_room, exits)
 
         if result_path is None:
             results.append(f"BRAK DROGI Z POMIESZCZENIA {threat}")
@@ -57,10 +74,8 @@ def evacuation_plan(n, k, m, adjacency_matrix, exits, threats):
             results.append(" ".join(map(str, result_path)))
     
     if safe:
-        # Oblicz pełną kolejność ewakuacji
-        full_dfs_path = []
-        visited_full = [False] * n
-        full_dfs(adjacency_matrix, threats[0] - 1, visited_full, full_dfs_path)
+        
+        full_dfs_path = full_dfs(adjacency_matrix, threats[0] - 1)
         full_dfs_path = list(dict.fromkeys(full_dfs_path))
         results.append(" ".join(map(str, full_dfs_path)))
 
@@ -80,7 +95,7 @@ def validate_input(n, k, m, adjacency_matrix, exits, threats):
         return False
     for row in adjacency_matrix:
         for element in row:
-            if element not in (0, 1):  # Check for values that are not 0 or 1
+            if element not in (0, 1): 
                 return False
     
     return True
@@ -113,7 +128,6 @@ if __name__ == "__main__":
     except Exception:
         print("BŁĄD")
         exit()
-
 
 
 
