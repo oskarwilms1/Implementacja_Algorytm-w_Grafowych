@@ -7,33 +7,7 @@ def quicksort(arr):
     right = [x for x in arr if x > pivot]
     return quicksort(left) + middle + quicksort(right)
 
-def dfs(graph, start, exits):
-    stack = []
-    visited = [False] * len(graph)
-    path = []
-    
-    stack.append(start)
-    
-    while stack:
-        current = stack.pop()
-        
-        if not visited[current]:
-            visited[current] = True
-            path.append(current + 1)  
-            
-            if (current + 1) in exits: 
-                return path
-
-            
-            neighbors = [i for i in range(len(graph[current])) if graph[current][i] == 1 and not visited[i]]
-            neighbors = quicksort(neighbors)  
-            
-            for neighbor in reversed(neighbors):  
-                stack.append(neighbor)
-
-    return None  
-
-def full_dfs(graph, start):
+def dfs(graph, start, exits=None):
     stack = []
     visited = [False] * len(graph)
     path = []
@@ -46,15 +20,20 @@ def full_dfs(graph, start):
         if not visited[current]:
             visited[current] = True
             path.append(current + 1)
-            
+
+            if exits and (current + 1) in exits: 
+                return path
+
             
             neighbors = [i for i in range(len(graph[current])) if graph[current][i] == 1 and not visited[i]]
             neighbors = quicksort(neighbors)  
             
             for neighbor in reversed(neighbors):  
                 stack.append(neighbor)
-
-    return path  
+    if exits:
+        return None
+    else:
+        return path
 
 def evacuation_plan(n, k, m, adjacency_matrix, exits, threats):
     exits = quicksort(exits)
@@ -72,11 +51,12 @@ def evacuation_plan(n, k, m, adjacency_matrix, exits, threats):
             safe = False
         else:
             results.append(" ".join(map(str, result_path)))
-    
     if safe:
         
-        full_dfs_path = full_dfs(adjacency_matrix, threats[0] - 1)
+        full_dfs_path = dfs(adjacency_matrix, threats[0] - 1)
         full_dfs_path = list(dict.fromkeys(full_dfs_path))
+        if len(full_dfs_path) != len(adjacency_matrix):
+            safe = False
         results.append(" ".join(map(str, full_dfs_path)))
 
     return safe, results
@@ -127,7 +107,7 @@ if __name__ == "__main__":
 
     except Exception:
         print("BŁĄD")
-        exit()
+        
 
 
 
