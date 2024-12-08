@@ -6,7 +6,7 @@ class Edge:
 
     def __lt__(self, other):
         if self.weight == other.weight:
-            return (self.v, self.u) < (other.v, other.u)
+            return (self.u, self.v) < (other.u, other.v)
         return self.weight < other.weight
 
 class UnionFind:
@@ -103,6 +103,11 @@ def find_bridges_and_components(n, edges):
             dfs(i, graph_without_bridges, visited, component)
             components.append(sorted(component))
 
+    for i in range(len(bridges)):
+        for j in range(0,len(bridges)-i-1):
+            if int(list(bridges[j])[0])>int(list(bridges[j+1])[0]):
+                bridges[j],bridges[j+1]=bridges[j+1],bridges[j]
+
     return bridges, components
 
 
@@ -113,8 +118,8 @@ def main():
     input_data = []
     for number in range(m):
         user_input = list(map(str, input().split()))
-
-        input_data.append(user_input) 
+        sorted_input = [str(min(int(user_input[0]),int(user_input[1]))),str(max(int(user_input[0]),int(user_input[1]))),user_input[2]]
+        input_data.append(sorted_input) 
 
 
     edges = []
