@@ -6,8 +6,8 @@ class Edge:
 
     def __lt__(self, other):
         if self.weight == other.weight:
-            return (self.u, self.v) < (other.u, other.v)
-        return self.weight < other.weight
+            return (self.u, self.v) > (other.u, other.v)
+        return self.weight > other.weight
 
 class UnionFind:
     def __init__(self, size):
@@ -30,9 +30,32 @@ class UnionFind:
             else:
                 self.parent[root_v] = root_u
                 self.rank[root_u] += 1
+def heapify(arr, n, i):
+    largest = i
+    left = 2 * i + 1
+    right = 2 * i + 2
 
+    if left < n and arr[left] < arr[largest]:
+        largest = left
+
+    if right < n and arr[right] < arr[largest]:
+        largest = right
+
+    if largest != i:
+        arr[i], arr[largest] = arr[largest], arr[i]
+        heapify(arr, n, largest)
+
+def heap_sort(arr):
+    n = len(arr)
+
+    for i in range(n // 2 - 1, -1, -1):
+        heapify(arr, n, i)
+
+    for i in range(n - 1, 0, -1):
+        arr[i], arr[0] = arr[0], arr[i]
+        heapify(arr, i, 0)
 def kruskal(n, edges):
-    edges.sort()  # Sort edges by weight and then by endpoints
+    heap_sort(edges)  # Sort edges by weight and then by endpoints
     uf = UnionFind(n + 1)
     mst = []
     total_cost = 0
@@ -48,7 +71,8 @@ def kruskal(n, edges):
 def dfs(u, graph, visited, component):
     visited[u] = True
     component.append(u)
-    for v in sorted(graph[u]):
+    heap_sort(graph[u])
+    for v in graph[u]:
         if not visited[v]:
             dfs(v, graph, visited, component)
 
@@ -69,7 +93,6 @@ def find_bridges_and_components(n, edges):
         vis[u] = True
         disc[u] = low[u] = time[0]
         time[0] += 1
-
         for v in sorted(graph[u]):
             if not vis[v]:
                 parent[v] = u
@@ -103,10 +126,7 @@ def find_bridges_and_components(n, edges):
             dfs(i, graph_without_bridges, visited, component)
             components.append(sorted(component))
 
-    for i in range(len(bridges)):
-        for j in range(0,len(bridges)-i-1):
-            if int(list(bridges[j])[0])>int(list(bridges[j+1])[0]):
-                bridges[j],bridges[j+1]=bridges[j+1],bridges[j]
+    bridges.sort(key=lambda x: int(x[0]))
 
     return bridges, components
 
@@ -133,7 +153,8 @@ def main():
     # Wyniki
 
     print("MINIMALNE DRZEWO SPINAJĄCE:")
-    for edge in sorted(mst, key=lambda e: (e.weight, e.u, e.v)):
+    heap_sort(mst)
+    for edge in mst:
         print(f"{edge.u} {edge.v} {edge.weight}")
     print(f"Łączny koszt: {total_cost}")
 
