@@ -1,43 +1,45 @@
+class Edge:
+    def __init__(self, u, v, weight):
+        self.u = u
+        self.v = v
+        self.weight = weight
+
+    def __lt__(self, other):
+        if self.weight == other.weight:
+            return (self.u, self.v) > (other.u, other.v)
+        return self.weight > other.weight
+
+class UnionFind:
+    def __init__(self, size):
+        self.parent = list(range(size))
+        self.rank = [0] * size
+
+    def find(self, u):
+        if self.parent[u] != u:
+            self.parent[u] = self.find(self.parent[u])
+        return self.parent[u]
+
+    def union(self, u, v):
+        root_u = self.find(u)
+        root_v = self.find(v)
+        if root_u != root_v:
+            if self.rank[root_u] > self.rank[root_v]:
+                self.parent[root_v] = root_u
+            elif self.rank[root_u] < self.rank[root_v]:
+                self.parent[root_u] = root_v
+            else:
+                self.parent[root_v] = root_u
+                self.rank[root_u] += 1
 class Graph:
     def __init__(self, n):
         self.n = n
         self.edges = []
         self.adj_list = [[] for _ in range(n + 1)]
-        self.parent = [i for i in range(n + 1)]
 
     def add_edge(self, a, b, w):
         self.edges.append((a, b, w))
         self.adj_list[a].append((b, w))
         self.adj_list[b].append((a, w))
-
-    def find(self, x):
-        if self.parent[x] != x:
-            self.parent[x] = self.find(self.parent[x])
-        return self.parent[x]
-
-    def union(self, x, y):
-        root_x = self.find(x)
-        root_y = self.find(y)
-        if root_x != root_y:
-            self.parent[root_x] = root_y
-
-    def kruskal(self):
-            mst_edges = []
-            total_cost = 0
-            pq = []
-            for edge in self.edges:
-                w, a, b = edge
-                pq.append((w, a, b))
-            pq.sort()
-
-            while pq:
-                w, a, b = pq.pop(0)
-                if self.find(a) != self.find(b):
-                    mst_edges.append([a, b, w])
-                    total_cost += w
-                    self.union(a, b)
-            return mst_edges, total_cost
-
     def dijkstra(self):
         dist = [[float('inf')] * (self.n + 1) for _ in range(self.n + 1)]
         for i in range(1, self.n + 1):
@@ -93,38 +95,76 @@ class Graph:
                 dfs(i, -1)
         
         return sorted(articulation_points)
+def heapify(arr, n, i):
+    largest = i
+    left = 2 * i + 1
+    right = 2 * i + 2
+
+    if left < n and arr[left] < arr[largest]:
+        largest = left
+
+    if right < n and arr[right] < arr[largest]:
+        largest = right
+
+    if largest != i:
+        arr[i], arr[largest] = arr[largest], arr[i]
+        heapify(arr, n, largest)
+
+def heap_sort(arr):
+    n = len(arr)
+
+    for i in range(n // 2 - 1, -1, -1):
+        heapify(arr, n, i)
+
+    for i in range(n - 1, 0, -1):
+        arr[i], arr[0] = arr[0], arr[i]
+        heapify(arr, i, 0)
+def kruskal(n, edges):
+    heap_sort(edges)  # Sort edges by weight and then by endpoints
+    uf = UnionFind(n + 1)
+    mst = []
+    total_cost = 0
+
+    for edge in edges:
+        if uf.find(edge.u) != uf.find(edge.v):
+            uf.union(edge.u, edge.v)
+            mst.append(edge)
+            total_cost += edge.weight
+
+    return mst, total_cost
+
+
 
 def main():
-    # Read the first line for n and m
-    first_line = input().strip()
-    n, m = map(int, first_line.split())
-    
-    if not (2 <= n <= 100 and n - 1 <= m <= n * (n - 1) // 2):
-        print("BŁĄD")
-        return
+    first_line = input().split()
+    n = int(first_line[0])  # liczba węzłów
+    m = int(first_line[1])  # liczba krawędzi
+    input_data = []
+    for number in range(m):
+        user_input = list(map(str, input().split()))
+        sorted_input = [str(min(int(user_input[0]),int(user_input[1]))),str(max(int(user_input[0]),int(user_input[1]))),user_input[2]]
+        input_data.append(sorted_input) 
 
     graph = Graph(n)
-    
-    # Read each edge
-    for _ in range(m):
-        edge_line = input().strip()
-        a, b, w = map(int, edge_line.split())
-        graph.add_edge(a, b, w)
 
-    # Calculate the MST
-    mst_edges, total_cost = graph.kruskal()
+    edges = []
+    for line in input_data:
+        u, v, w = map(int, line)
+        edges.append(Edge(u, v, w))
+        graph.add_edge(u, v, w)
 
-    # Output MST
+    mst, total_cost = kruskal(n, edges)
+
+    # Wyniki
+
     print("SIEĆ PODSTAWOWA (MST):")
-    mst_edges.sort(key=lambda x: (x[2], x[0], x[1]))  # sort by weight, then by vertex
-    for a, b, w in mst_edges:
-        if a<b:
-            print(f"{a}-{b}: {w}")
-        else:
-            print(f"{b}-{a}: {w}")
+    heap_sort(mst)
+    for edge in mst:
+        print(f"{edge.u}-{edge.v}: {edge.weight}")
     print(f"Łączny czas: {total_cost}")
 
-    # Calculate shortest paths
+
+     # Calculate shortest paths
     distances = graph.dijkstra()
 
     # Calculate Diameter, Radius, Centers, and Peripheries
@@ -167,6 +207,7 @@ def main():
         print(" ".join(map(str, articulation_points)))
     else:
         print("BRAK")
+    
 
 if __name__ == "__main__":
     main()

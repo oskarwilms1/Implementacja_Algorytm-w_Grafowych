@@ -1,3 +1,19 @@
+class PriorityQueue:
+    def __init__(self):
+        self.elements = []
+
+    def empty(self):
+        return len(self.elements) == 0
+
+    def put(self, item, priority):
+        self.elements.append((priority, item))
+
+    def get(self):
+        self.elements.sort()
+        return self.elements.pop(0)[1]
+
+import sys
+
 class Graph:
     def __init__(self, n):
         self.n = n
@@ -6,7 +22,7 @@ class Graph:
         self.parent = [i for i in range(n + 1)]
 
     def add_edge(self, a, b, w):
-        self.edges.append((a, b, w))
+        self.edges.append((w, a, b))
         self.adj_list[a].append((b, w))
         self.adj_list[b].append((a, w))
 
@@ -38,25 +54,25 @@ class Graph:
                     self.union(a, b)
             return mst_edges, total_cost
 
-    def dijkstra(self):
-        dist = [[float('inf')] * (self.n + 1) for _ in range(self.n + 1)]
-        for i in range(1, self.n + 1):
-            dist[i][i] = 0
-            visited = [False] * (self.n + 1)
-            min_edges = [(0, i)]  # (cost, vertex)
+    def dijkstra(self, start):
+        dist = [sys.maxsize] * self.n
+        dist[start] = 0
 
-            while min_edges:
-                current_dist, node = min_edges.pop(0)
-                if visited[node]:
-                    continue
-                visited[node] = True
+        for _ in range(self.n):
+            node = -1
+            min_distance = sys.maxsize
+            for i in range(self.n):
+                if dist[i] < min_distance:
+                    min_distance = dist[i]
+                    node = i
+            if min_distance == sys.maxsize:
+                break
 
-                for neighbor, weight in self.adj_list[node]:
-                    distance = current_dist + weight
-                    if distance < dist[i][neighbor]:
-                        dist[i][neighbor] = distance
-                        min_edges.append((distance, neighbor))
-                min_edges.sort()  # Sort edges based on distance
+            for neighbor, weight in self.adj_list[node]:
+                distance = dist[node] + weight
+                if distance < dist[neighbor]:
+                    dist[neighbor] = distance
+
         return dist
 
     def find_articulation_points(self):
@@ -116,12 +132,14 @@ def main():
 
     # Output MST
     print("SIEĆ PODSTAWOWA (MST):")
-    mst_edges.sort(key=lambda x: (x[2], x[0], x[1]))  # sort by weight, then by vertex
-    for a, b, w in mst_edges:
-        if a<b:
-            print(f"{a}-{b}: {w}")
-        else:
-            print(f"{b}-{a}: {w}")
+    for edge in mst_edges:
+        if edge[0]>edge[1]:
+            edge[0],edge[1]=edge[1],edge[0]
+    mst_edges.sort(key=lambda x: (x[2],x[0]))
+    for edge in mst_edges:
+        print(f"{edge[0]}-{edge[1]}: {edge[2]}")
+       
+        
     print(f"Łączny czas: {total_cost}")
 
     # Calculate shortest paths
@@ -136,7 +154,7 @@ def main():
         eccentricities.append(max_dist)
         if max_dist > diameter:
             diameter = max_dist
-
+    diameter = max(max(distances[i][1:n+1]) for i in range(1, n+1))
     radius = min(eccentricities)
     
     centers = [i for i in range(1, n + 1) if eccentricities[i - 1] == radius]
